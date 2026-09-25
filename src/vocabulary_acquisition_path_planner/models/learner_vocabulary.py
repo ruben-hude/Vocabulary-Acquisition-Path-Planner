@@ -14,17 +14,36 @@ class LearnerVocabulary:
         self._word_exposures = {}
 
     def account_for_media(self, media):
-        """Account for one view of every word group contained in media."""
-        for word_group in media.word_group_occurrences:
+        """Account for each occurrence of every word group contained in media."""
+        for word_group, occurrence_count in media.word_group_occurrences.items():
             if word_group in self._known_words:
                 continue
 
-            exposures = self._word_exposures.get(word_group, 0) + 1
+            exposures = (
+                self._word_exposures.get(word_group, 0) + occurrence_count
+            )
             if exposures >= self.exposure_threshold:
                 self._known_words.add(word_group)
                 self._word_exposures.pop(word_group, None)
             else:
                 self._word_exposures[word_group] = exposures
+
+    def know_percentage(self, media):
+        """Give the percentage of known vocabulary in a media."""
+        nb_known_words = 0
+        nb_total_words = 0
+
+        for word_group, occurrence_count in (
+            media.word_group_occurrences.items()
+        ):
+            nb_total_words += occurrence_count
+            if word_group in self._known_words:
+                nb_known_words += occurrence_count
+
+        if nb_total_words == 0:
+            return 0.0
+
+        return nb_known_words / nb_total_words
 
     @property
     def known_words(self):
