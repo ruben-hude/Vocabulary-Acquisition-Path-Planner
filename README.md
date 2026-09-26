@@ -80,11 +80,13 @@ shortest-path solution.
 
 ## Roadmap
 
-1. Define the data model for word groups, media, and learner vocabulary.
-2. Implement text comparison and vocabulary coverage metrics.
-3. Build an implicit graph representation.
-4. Implement a baseline path search, starting with Dijkstra's algorithm.
-5. Add realistic media-cost and comprehension models.
-6. Evaluate heuristic and approximate search methods.
-7. Design a user interface for creating, inspecting, and adapting learning
+- [x] Define the data model for word groups, media, and learner vocabulary.
+- [x] Implement text comparison and vocabulary coverage metrics.
+- [x] Build an implicit graph representation.
+- [x] Implement a baseline path search, starting with Dijkstra's algorithm.
+- [ ] Support more different media
+- [ ] Add better representation of learner's vocabulary
+- [ ] Add realistic media-cost and comprehension models.
+- [ ] Evaluate heuristic and approximate search methods to find path on larger data sets.
+- [ ] Design a user interface for creating, inspecting, and adapting learning
    paths.
