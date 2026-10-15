@@ -98,9 +98,4 @@ class PathFinder:
     @staticmethod
     def _state_key(vertex):
         """Return a hashable key for a media and vocabulary state."""
-        vocabulary = vertex.vocabulary
-        return (
-            id(vertex.media),
-            frozenset(vocabulary.known_words),
-            frozenset(vocabulary.word_exposures.items()),
-        )
+        return (id(vertex.media), vertex.vocabulary.state_key())
