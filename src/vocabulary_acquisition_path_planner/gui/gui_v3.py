@@ -35,6 +35,30 @@ from vocabulary_acquisition_path_planner.search.path_finder import PathFinder
 ctk.set_appearance_mode("System")  # "System", "Dark", "Light"
 ctk.set_default_color_theme("blue")  # "blue", "green", "dark-blue"
 
+# Color palette
+
+# Background and global text colors (Light Mode, Dark Mode)
+COLOR_BG = ("#f0f0f0", "#2b2b2b")
+COLOR_FG = ("#000000", "#ffffff")
+COLOR_SUBTLE_BG = ("#e0e0e0", "#383838")
+COLOR_BLUE_ACCENT = ("#1f538d", "#1f538d")
+COLOR_BLUE_HOVER = ("#14375e", "#14375e")
+
+# Button styles
+
+BUTTON_STYLE_PRIMARY = {
+    "fg_color": COLOR_BLUE_ACCENT,
+    "hover_color": COLOR_BLUE_HOVER,
+    "text_color": "#ffffff",
+}
+
+BUTTON_STYLE_SECONDARY = {
+    "fg_color": "transparent",
+    "border_width": 1,
+    "border_color": ("gray60", "gray40"),
+    "hover_color": COLOR_SUBTLE_BG,
+    "text_color": COLOR_FG,
+}
 
 # ---------------------------------------------------------------- languages
 TRANSLATIONS = {
@@ -228,8 +252,8 @@ TRANSLATIONS = {
     },
 }
 
-LANGUAGE_ORDER = ("es", "en", "fr")
-DEFAULT_LANGUAGE = "es"
+LANGUAGE_ORDER = ("en", "fr", "es")
+DEFAULT_LANGUAGE = "en"
 
 
 @dataclass
@@ -460,21 +484,20 @@ class PlannerApp(ctk.CTkFrame):
             text=self.t("add_texts"),
             command=self.add_media_files,
             width=110,
+            **BUTTON_STYLE_PRIMARY,
         ).pack(side="left", padx=(0, 4))
         ctk.CTkButton(
             btn_frame,
             text=self.t("remove"),
             command=self.remove_selected,
-            fg_color="transparent",
-            border_width=1,
             width=80,
+            **BUTTON_STYLE_SECONDARY,
         ).pack(side="left", padx=4)
         ctk.CTkButton(
             btn_frame,
             text=self.t("toggle_read"),
             command=self.toggle_read,
-            fg_color="transparent",
-            border_width=1,
+            **BUTTON_STYLE_SECONDARY,
         ).pack(side="left", padx=4)
 
     def _build_vocabulary_panel(self, parent: ctk.CTkFrame):
@@ -504,14 +527,14 @@ class PlannerApp(ctk.CTkFrame):
             text=self.t("load_words"),
             command=self.load_known_words,
             width=130,
+            **BUTTON_STYLE_PRIMARY,
         ).pack(side="left", padx=(0, 4))
         ctk.CTkButton(
             btn_frame,
             text=self.t("clear"),
             command=self.clear_known_words,
-            fg_color="transparent",
-            border_width=1,
             width=70,
+            **BUTTON_STYLE_SECONDARY,
         ).pack(side="left", padx=4)
 
     def _build_parameters_panel(self, parent: ctk.CTkFrame):
@@ -589,7 +612,10 @@ class PlannerApp(ctk.CTkFrame):
         actions.pack(fill="x", padx=10, pady=(8, 10))
 
         self.search_button = ctk.CTkButton(
-            actions, text=self.t("find_path"), command=self.start_search
+            actions,
+            text=self.t("find_path"),
+            command=self.start_search,
+            **BUTTON_STYLE_PRIMARY,
         )
         self.search_button.pack(side="left")
 
@@ -806,7 +832,8 @@ class PlannerApp(ctk.CTkFrame):
         registry = WordGroupRegistry()
         unknown = 0
         for word in re.findall(r"[^\W\d_]+(?:['-][^\W\d_]+)*", text):
-            group = registry.lookup(word)
+            # Utilisation de get_group_id() au lieu de lookup()
+            group = registry.get_group_id(word)
             if group is None:
                 unknown += 1
             else:
