@@ -1,6 +1,5 @@
 """Implicit graph for planning a sequence of learning media."""
 
-from copy import deepcopy
 from dataclasses import dataclass
 
 from vocabulary_acquisition_path_planner.models.learner_vocabulary import (
@@ -40,7 +39,7 @@ class Graph:
 
         self.media = tuple(media)
         self.initial_vocabulary = (
-            deepcopy(initial_vocabulary)
+            initial_vocabulary.clone()
             if initial_vocabulary is not None
             else LearnerVocabulary()
         )
@@ -48,7 +47,7 @@ class Graph:
 
     def initial_vertex(self):
         """Return the graph's starting vertex before any media is consumed."""
-        return Vertex(None, deepcopy(self.initial_vocabulary))
+        return Vertex(None, self.initial_vocabulary.clone())
 
     def successors(self, vertex):
         """Generate edges for media understandable from the given vertex."""
@@ -61,7 +60,7 @@ class Graph:
             ):
                 continue
 
-            vocabulary = deepcopy(vertex.vocabulary)
+            vocabulary = vertex.vocabulary.clone()
             vocabulary.account_for_media(candidate)
             yield Edge(
                 target=Vertex(candidate, vocabulary),

@@ -46,6 +46,27 @@ def test_known_words_are_not_counted_again():
     assert vocabulary.word_exposures == {}
 
 
+def test_media_update_can_be_undone_after_crossing_the_threshold():
+    vocabulary = LearnerVocabulary(exposure_threshold=5)
+    vocabulary.account_for_media(Media({"play": 3}))
+
+    changes = vocabulary.account_for_media(Media({"play": 2, "read": 1}))
+    vocabulary.undo_media(changes)
+
+    assert vocabulary.known_words == set()
+    assert vocabulary.word_exposures == {"play": 3}
+
+
+def test_media_update_can_be_undone_to_an_empty_vocabulary():
+    vocabulary = LearnerVocabulary(exposure_threshold=5)
+
+    changes = vocabulary.account_for_media(Media({"play": 2}))
+    vocabulary.undo_media(changes)
+
+    assert vocabulary.known_words == set()
+    assert vocabulary.word_exposures == {}
+
+
 def test_know_percentage_is_weighted_by_word_occurrences():
     vocabulary = LearnerVocabulary(exposure_threshold=1)
     vocabulary.account_for_media(Media({"play": 1}))
@@ -53,6 +74,18 @@ def test_know_percentage_is_weighted_by_word_occurrences():
     percentage = vocabulary.know_percentage(Media({"play": 3, "read": 1}))
 
     assert percentage == 0.75
+
+
+def test_clone_has_independent_vocabulary_state():
+    vocabulary = LearnerVocabulary(exposure_threshold=5)
+    vocabulary.account_for_media(Media({"play": 2}))
+
+    clone = vocabulary.clone()
+    clone.account_for_media(Media({"play": 3}))
+
+    assert vocabulary.known_words == set()
+    assert vocabulary.word_exposures == {"play": 2}
+    assert clone.known_words == {"play"}
 
 
 def test_exposure_threshold_must_be_positive():

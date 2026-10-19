@@ -21,7 +21,7 @@ def main():
         type=float,
         default=0.8,
     )
-    parser.add_argument("--time-limit-seconds", type=float, default=10)
+    parser.add_argument("--time-limit-seconds", type=float, default=30)
     args = parser.parse_args()
 
     source = Media.from_text_file(args.source)
