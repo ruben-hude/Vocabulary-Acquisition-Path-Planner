@@ -1,0 +1,11 @@
+{
+  "books": {
+    "book_11.txt": {
+      "source_path": "C:\\Users\\thoma\\FichiersPerso\\01-Ecole\\2A\\ProCom\\Projet_code\\Vocabulary-Acquisition-Path-Planner\\data\\raw\\gutenberg_books\\book_11.txt",
+      "read_at": [
+        "2026-10-07"
+      ],
+      "is_read": true
+    }
+  }
+}
