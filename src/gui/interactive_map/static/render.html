@@ -1,0 +1,50 @@
+<!-- This page provides a visual test for afficher.js. -->
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Book Graph</title>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+    <style>
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+      }
+      body {
+        font-family: sans-serif;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      label {
+        flex: 0 0 auto;
+        padding: 10px;
+        box-sizing: border-box;
+      }
+      svg {
+        border: 1px solid #ccc;
+        width: 100%;
+        height: auto;
+        flex: 1 1 auto;
+        box-sizing: border-box;
+      }
+      text {
+        font-size: 12px;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <label
+      >Similarity threshold: <span id="val">50</span>
+      <input type="range" id="seuil" min="0" max="100" step="0.1" value="50" />
+      <input type="number" id="seuil-number" min="0" max="100" step="any" value="50" />
+    </label>
+    <svg></svg>
+
+    <script src="render.js"></script>
+  </body>
+</html>
