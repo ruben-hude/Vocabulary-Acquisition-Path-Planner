@@ -9,3 +9,14 @@ env/
 
 # VS Code configuration
 .vscode/
+
+# Test cache
+.pytest_cache/
+
+# Local databases
+*.db
+*.sqlite3
+
+# Local secrets and OS files
+.env
+.DS_Store
