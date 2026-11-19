@@ -18,6 +18,42 @@ The central idea is to model each step as a combination of:
 The planner should then find a path from a learner's starting vocabulary to a
 target level/media while taking the cost of each piece of media into account.
 
+## Setting up the environment
+
+Create and activate a virtual environment from the project root.
+
+### macOS and Linux
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install pandas
+pip install openpyxl
+pip install pytest
+pip install tkinter
+```
+
+### Windows (PowerShell)
+
+```powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install pandas
+pip install openpyxl
+pip install pytest
+pip install tkinter
+```
+
+Run the test suite with:
+
+```bash
+pytest
+```
+
+For instructions on running the project scripts, see [docs/SCRIPTS.md](docs/SCRIPTS.md).
+
+Run the current UI by launching `src/vocabulary_acquisition_path_planner/gui_v3.py` with Python 3.
+
 ## Problem Model
 
 ### Word groups
