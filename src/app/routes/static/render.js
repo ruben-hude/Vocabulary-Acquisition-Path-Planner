@@ -43,7 +43,7 @@ async function apiFetch(path) {
 
 async function loadGraph() {
   try {
-    const booksResponse = await apiFetch("/books");
+    const booksResponse = await apiFetch("/api/books");
     const booksData = await booksResponse.json();
     books = booksData.books
       .map(book => {
@@ -57,7 +57,7 @@ async function loadGraph() {
 
     nodes = books.map(book => ({ ...book }));
 
-    const similaritiesResponse = await apiFetch("/similarities");
+    const similaritiesResponse = await apiFetch("/api/similarities");
     const similaritiesData = await similaritiesResponse.json();
     const links = similaritiesData.links.map(link => ({
       source: String(link.source),

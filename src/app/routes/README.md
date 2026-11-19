@@ -51,7 +51,7 @@ pip install pandas openpyxl
 From the project root, start the FastAPI API with:
 
 ```powershell
-fastapi dev src/gui/interactive_map/api_gui.py
+fastapi dev src/app/main.py
 ```
 
 Then open the address displayed by FastAPI, typically:
@@ -60,12 +60,14 @@ Then open the address displayed by FastAPI, typically:
 http://127.0.0.1:8000
 ```
 
-The server directly exposes the interactive page located in
-`src/gui/interactive_map/static`.
+The server exposes the interactive page and API routes through
+`src/app/main.py`. The static page is located in `src/app/routes/static`.
 
 ## Structure
 
-- `api_gui.py`: FastAPI API that lists the books and calculates their similarity.
+- `main.py`: main FastAPI application.
+- `routes/pathhandler.py`: book and similarity API routes.
+- `routes/profilehandler.py`: profile and preferences API routes.
 - `static/render.html`: HTML interface for the map.
 - `static/render.js`: Data retrieval, D3.js graph construction, and similarity
   threshold handling.

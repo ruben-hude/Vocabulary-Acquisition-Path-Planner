@@ -1,39 +1,25 @@
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
+from fastapi import APIRouter, HTTPException
 from fastapi.responses import RedirectResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.middleware.cors import CORSMiddleware
 
 from vocabulary_acquisition_path_planner.models.learner_vocabulary import (
     LearnerVocabulary,
 )
 from vocabulary_acquisition_path_planner.models.media import Media
-from vocabulary_acquisition_path_planner.search.graph import Graph
-from vocabulary_acquisition_path_planner.search.path_finder import PathFinder
-
-app = FastAPI()
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
-    allow_methods=["GET"],
-    allow_headers=["*"],
-)
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
-STATIC_DIRECTORY = Path(__file__).parent / "static"   # src/gui/interactive_map/static
 BOOKS_PATH = PROJECT_ROOT / "data" / "raw" / "gutenberg_books" # Path to the folder containing the books
 
+router = APIRouter()
 
 
-@app.get("/")
+@router.get("/")
 def get_index():
     return RedirectResponse(url="/render.html")
 
 
-@app.get("/books")
+@router.get("/api/books")
 def get_books():
     """
     Return a list of available books in the static folder.
@@ -44,7 +30,7 @@ def get_books():
         books.append({"name": file.stem, "path": str(file.relative_to(PROJECT_ROOT))})
     return {"books": books}
 
-@app.get("/book/{id}")
+@router.get("/api/book/{id}")
 def get_book(id: int):
     """
     Return the content of a specific book by its name.
@@ -59,7 +45,7 @@ def get_book(id: int):
     return {"id": id, "name": book_path.stem, "content": content}
 
 
-@app.get("/similarities")
+@router.get("/api/similarities")
 def get_similarities():
     """Return every pairwise similarity for the available books."""
     media_by_id = {}
@@ -82,7 +68,7 @@ def get_similarities():
 
     return {"links": links}
 
-@app.get("/similarity/{id1}/{id2}")
+@router.get("/api/similarity/{id1}/{id2}")
 def get_similarity(
     id1: int,
     id2: int,
@@ -107,7 +93,3 @@ def get_similarity(
         "target": str(book2_path.relative_to(PROJECT_ROOT)),
         "similar_percent": book_vocab.know_percentage(target),
     }
-
-
-# Mount last so that it does not hide the API routes.
-app.mount("/", StaticFiles(directory=STATIC_DIRECTORY, html=True), name="static")
