@@ -7,7 +7,7 @@ _preferences = Preferences(genres=["Fantasy", "Classics"], favorite_books=["narn
 
 
 def get_profile() -> Profile:
-    mots = [2100, 2380, 2650, 2900, 3050, 3200]
+    words = [2100, 2380, 2650, 2900, 3050, 3200]
     months = ["June", "July", "August", "September", "October", "November"]
     return Profile(
         name="User Name",
