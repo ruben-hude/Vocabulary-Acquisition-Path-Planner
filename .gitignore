@@ -10,6 +10,9 @@ env/
 # VS Code configuration
 .vscode/
 
+*.egg-info/
+data/raw/
+
 # Test cache
 .pytest_cache/
 
