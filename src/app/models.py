@@ -12,6 +12,7 @@ class Profile(BaseModel):
     member_since: str
     level: str
     known_words: int
+    nb_read_books: int
     history: list[VocabularyPoint]
 
 

@@ -14,6 +14,7 @@ def get_profile() -> Profile:
         member_since="June 2026",
         level="B2",
         known_words=3200,
+        nb_read_books= 14,
         history=[VocabularyPoint(month=month, known_words=value)
                  for month, value in zip(months, mots)],
     )
