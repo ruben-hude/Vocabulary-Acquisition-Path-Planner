@@ -17,6 +17,20 @@ env/
 *.db
 *.sqlite3
 
+# Downloaded Gutenberg text files
+data/raw/gutenberg_books/*.txt
+!data/raw/gutenberg_books/book_11.txt
+!data/raw/gutenberg_books/book_84.txt
+!data/raw/gutenberg_books/book_98.txt
+!data/raw/gutenberg_books/book_345.txt
+!data/raw/gutenberg_books/book_1232.txt
+!data/raw/gutenberg_books/book_1342.txt
+!data/raw/gutenberg_books/book_1513.txt
+!data/raw/gutenberg_books/book_1661.txt
+!data/raw/gutenberg_books/book_2701.txt
+!data/raw/gutenberg_books/book_64317.txt
+
+
 # Local secrets and OS files
 .env
 .DS_Store

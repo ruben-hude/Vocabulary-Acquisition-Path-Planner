@@ -7,8 +7,9 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-OUTPUT_DIR = Path("data/raw/gutenberg_books")
-METADATA_FILE = Path("data/books_metadata.json")
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+OUTPUT_DIR = PROJECT_ROOT / "data" / "raw" / "gutenberg_books"
+METADATA_FILE = PROJECT_ROOT / "data" / "books_metadata.json"
 TARGET_COUNT = 1000
 
 HF_ROWS_API = "https://datasets-server.huggingface.co/rows?dataset=manu%2Fproject_gutenberg&config=default&split=en"
@@ -88,8 +89,24 @@ def build_library(target_count: int = TARGET_COUNT):
     if METADATA_FILE.exists():
         metadata_db = json.loads(METADATA_FILE.read_text(encoding="utf-8"))
 
+    # Remove stale metadata entries whose text files are no longer present locally.
+    valid_metadata = {}
+    for book_id, info in metadata_db.items():
+        file_path = Path(info.get("file_path", ""))
+        if not file_path.is_absolute():
+            file_path = PROJECT_ROOT / file_path
+        if file_path.exists():
+            info["file_path"] = file_path.relative_to(PROJECT_ROOT).as_posix()
+            valid_metadata[book_id] = info
+
+    metadata_db = valid_metadata
+    METADATA_FILE.write_text(
+        json.dumps(metadata_db, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+
     count = len(metadata_db)
-    offset = count
+    offset = 0
     batch_size = 10  # Paquets de 10 livres pour aller 2x plus vite
 
     print(f"Reprise du téléchargement ({count}/{target_count} déjà présents)...", flush=True)
@@ -127,7 +144,7 @@ def build_library(target_count: int = TARGET_COUNT):
 
             metadata_db[book_id] = {
                 "id": int(book_id),
-                "file_path": str(file_path).replace("\\", "/"),
+                "file_path": file_path.relative_to(PROJECT_ROOT).as_posix(),
                 "title": info["title"],
                 "author": info["author"],
                 "release_date": info["release_date"],
