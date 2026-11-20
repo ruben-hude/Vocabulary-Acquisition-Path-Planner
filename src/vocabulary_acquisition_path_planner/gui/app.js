@@ -50,6 +50,29 @@
     document.body.prepend(banner);
   }
 
+  // Bloc de remplacement quand un livre n'a pas de couverture
+  function coverPlaceholder(title) {
+    const d = el("div", "", title);
+    d.style.cssText = "width:175px;height:260px;border-radius:8px;flex-shrink:0;" +
+      "background:linear-gradient(90deg,#d1bdf2,#8c6ecc);color:#fff;font-weight:700;" +
+      "font-size:20px;line-height:1.25;display:flex;align-items:center;" +
+      "justify-content:center;text-align:center;padding:0 14px";
+    return d;
+  }
+
+  // Miniatures des « livres aimés » : de simples pastilles, car l'API n'envoie que des identifiants
+  function renderMinis(count) {
+    const minis = document.querySelector(".minis");
+    const n = Math.min(count, 3);
+    minis.replaceChildren(...Array.from({ length: n }, (_, i) => {
+      const m = el("div");
+      m.style.cssText = "width:36px;height:52px;border:2px solid #fff;border-radius:6px;" +
+        "background:linear-gradient(90deg,#d1bdf2,#8c6ecc);" +
+        `margin-right:${i === n - 1 ? 0 : -10}px`;
+      return m;
+    }));
+  }
+
   // ---------- Profil : identité, niveau, pastille ----------
   function renderProfile(p, targetTitle) {
     document.querySelector("#profil .user-name").textContent = p.name;
@@ -107,13 +130,18 @@
   }
 
   // ---------- Derniers livres lus ----------
-  function renderReadBooks(books) {
+    function renderReadBooks(books) {
     document.querySelector(".livres").replaceChildren(...books.slice(0, 3).map(b => {
       const card = el("article", "livre");
-      const img = el("img");
-      img.src = b.cover_url;
-      img.alt = `Couverture de ${b.title}`;
-      img.onerror = () => { img.style.visibility = "hidden"; };   // image introuvable : on masque
+      let cover;
+      if (b.cover_url) {
+        cover = el("img");
+        cover.src = b.cover_url;
+        cover.alt = `Couverture de ${b.title}`;
+        cover.onerror = () => cover.replaceWith(coverPlaceholder(b.title));   // image introuvable
+      } else {
+        cover = coverPlaceholder(b.title);
+      }
       const info = el("div", "livre-infos");
       info.append(
         el("h3", "", b.title),
@@ -121,7 +149,7 @@
         el("div", "date muted", `Terminé le ${dateFR(b.completed_at)}`),
         el("span", "pill", `+ ${fmt(b.learned_words)} mots appris`)
       );
-      card.append(img, info);
+      card.append(cover, info);
       return card;
     }));
   }
@@ -165,6 +193,7 @@
     genres.replaceChildren(...shown.map(g => el("span", "pill", GENRES[g] ?? g)));
     if (rest > 0) genres.append(el("span", "pill more", `+ ${rest}`));
     const n = p.favorite_books.length;
+    renderMinis(n);
     document.querySelector("#liked-count").textContent = `${n} livre${n > 1 ? "s" : ""} aimé${n > 1 ? "s" : ""}`;
   }
 
