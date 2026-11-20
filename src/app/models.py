@@ -23,7 +23,7 @@ class ReadBook(BaseModel):
     level: str
     completed_at: str
     learned_words: int
-    cover_url: str
+    cover_url: str | None = None
 
 
 class PathStep(BaseModel):

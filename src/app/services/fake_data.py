@@ -24,10 +24,10 @@ def get_read_books() -> list[ReadBook]:
     return [
         ReadBook(id="psychology-of-money", title="The Psychology of Money",
                  author="Morgan Housel", level="B2", completed_at="2026-10-28",
-                 learned_words=210, cover_url="/static/covers/psychology.jpg"),
+                 learned_words=210),
         ReadBook(id="dorian-gray", title="The Picture of Dorian Gray",
                  author="Oscar Wilde", level="B2", completed_at="2026-10-03",
-                 learned_words=320, cover_url="/static/covers/dorian.jpg"),
+                 learned_words=320),
     ]
 
 
