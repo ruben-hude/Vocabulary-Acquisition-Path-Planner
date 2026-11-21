@@ -35,14 +35,30 @@
         font-size: 12px;
         pointer-events: none;
       }
+      #controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      #view-toggle {
+        border: 0;
+        border-radius: 4px;
+        background: #6a3d9a;
+        color: white;
+        padding: 8px 12px;
+        cursor: pointer;
+      }
     </style>
   </head>
   <body>
-    <label
-      >Similarity threshold: <span id="val">50</span>
-      <input type="range" id="seuil" min="0" max="100" step="0.1" value="50" />
-      <input type="number" id="seuil-number" min="0" max="100" step="any" value="50" />
-    </label>
+    <div id="controls">
+      <button id="view-toggle" type="button">View: person</button>
+      <label
+        >Similarity threshold: <span id="val">50</span>
+        <input type="range" id="seuil" min="0" max="100" step="0.1" value="50" />
+        <input type="number" id="seuil-number" min="0" max="100" step="any" value="50" />
+      </label>
+    </div>
     <svg></svg>
 
     <script src="render.js"></script>
