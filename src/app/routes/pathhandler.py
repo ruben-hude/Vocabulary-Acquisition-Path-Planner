@@ -1,17 +1,30 @@
+import json
+from functools import lru_cache
 from pathlib import Path
 
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import RedirectResponse
 
-from vocabulary_acquisition_path_planner.models.learner_vocabulary import (
-    LearnerVocabulary,
-)
-from vocabulary_acquisition_path_planner.models.media import Media
-
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 BOOKS_PATH = PROJECT_ROOT / "data" / "raw" / "gutenberg_books" # Path to the folder containing the books
+SIMILARITIES_PATH = PROJECT_ROOT / "data" / "raw" / "similarity_books.json"
 
 router = APIRouter()
+
+
+@lru_cache(maxsize=1)
+def load_similarities() -> dict[str, dict[str, float]]:
+    """Load the precomputed matrix once per server process."""
+    try:
+        return json.loads(SIMILARITIES_PATH.read_text(encoding="utf-8"))
+    except FileNotFoundError as error:
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                "Precomputed similarities are unavailable. "
+                "Run scripts/booksimilaritytoJSON.py first."
+            ),
+        ) from error
 
 
 @router.get("/")
@@ -47,23 +60,16 @@ def get_book(id: int):
 
 @router.get("/api/similarities")
 def get_similarities():
-    """Return every pairwise similarity for the available books."""
-    media_by_id = {}
-    for book_path in BOOKS_PATH.glob("book_*.txt"):
-        id = int(book_path.stem.removeprefix("book_"))
-        media_by_id[id] = Media.from_text_file(book_path)
-
+    """Return each precomputed pairwise similarity once."""
+    similarities = load_similarities()
     links = []
-    ids = sorted(media_by_id)
+    ids = sorted(int(book_id) for book_id in similarities)
     for index, id1 in enumerate(ids):
-        book_vocab = LearnerVocabulary()
-        book_vocab.account_for_media(media_by_id[id1])
         for id2 in ids[index + 1 :]:
-            similar_percent = book_vocab.know_percentage(media_by_id[id2])
             links.append({
                 "source": id1,
                 "target": id2,
-                "similar_percent": similar_percent,
+                "similar_percent": similarities[str(id1)][str(id2)],
             })
 
     return {"links": links}
@@ -83,13 +89,17 @@ def get_similarity(
     if not book1_path.exists() or not book2_path.exists():
         raise HTTPException(status_code=404, detail="One or both books not found")
     
-    source = Media.from_text_file(book1_path)
-    target = Media.from_text_file(book2_path)
-    book_vocab = LearnerVocabulary()
-    book_vocab.account_for_media(source)
+    similarities = load_similarities()
+    try:
+        similar_percent = similarities[str(id1)][str(id2)]
+    except KeyError as error:
+        raise HTTPException(
+            status_code=404,
+            detail="Similarity not found for one or both book IDs",
+        ) from error
 
     return {
         "source": str(book1_path.relative_to(PROJECT_ROOT)),
         "target": str(book2_path.relative_to(PROJECT_ROOT)),
-        "similar_percent": book_vocab.know_percentage(target),
+        "similar_percent": similar_percent,
     }

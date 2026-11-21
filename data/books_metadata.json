@@ -7998,5 +7998,85 @@
     "author": "Various",
     "release_date": "June 6, 2005",
     "word_count": 13524
+  },
+  "11": {
+    "id": 11,
+    "file_path": "data/raw/gutenberg_books/book_11.txt",
+    "title": "Alice's Adventures in Wonderland",
+    "author": "Lewis Carroll",
+    "release_date": "Unknown",
+    "word_count": 26525
+  },
+  "84": {
+    "id": 84,
+    "file_path": "data/raw/gutenberg_books/book_84.txt",
+    "title": "Frankenstein; or, the Modern Prometheus",
+    "author": "Mary Wollstonecraft (Godwin) Shelley",
+    "release_date": "Unknown",
+    "word_count": 75042
+  },
+  "98": {
+    "id": 98,
+    "file_path": "data/raw/gutenberg_books/book_98.txt",
+    "title": "A Tale of Two Cities",
+    "author": "Charles Dickens",
+    "release_date": "Unknown",
+    "word_count": 135886
+  },
+  "345": {
+    "id": 345,
+    "file_path": "data/raw/gutenberg_books/book_345.txt",
+    "title": "Dracula",
+    "author": "Bram Stoker",
+    "release_date": "Unknown",
+    "word_count": 161321
+  },
+  "1232": {
+    "id": 1232,
+    "file_path": "data/raw/gutenberg_books/book_1232.txt",
+    "title": "The Prince",
+    "author": "Nicolo Machiavelli",
+    "release_date": "Unknown",
+    "word_count": 49943
+  },
+  "1342": {
+    "id": 1342,
+    "file_path": "data/raw/gutenberg_books/book_1342.txt",
+    "title": "Pride and Prejudice",
+    "author": "Jane Austen",
+    "release_date": "Unknown",
+    "word_count": 127359
+  },
+  "1513": {
+    "id": 1513,
+    "file_path": "data/raw/gutenberg_books/book_1513.txt",
+    "title": "The Tragedy of Romeo and Juliet",
+    "author": "William Shakespeare",
+    "release_date": "Unknown",
+    "word_count": 25958
+  },
+  "1661": {
+    "id": 1661,
+    "file_path": "data/raw/gutenberg_books/book_1661.txt",
+    "title": "The Adventures of Sherlock Holmes",
+    "author": "Arthur Conan Doyle",
+    "release_date": "Unknown",
+    "word_count": 104508
+  },
+  "2701": {
+    "id": 2701,
+    "file_path": "data/raw/gutenberg_books/book_2701.txt",
+    "title": "Moby-Dick; or, The Whale",
+    "author": "Herman Melville",
+    "release_date": "Unknown",
+    "word_count": 212796
+  },
+  "64317": {
+    "id": 64317,
+    "file_path": "data/raw/gutenberg_books/book_64317.txt",
+    "title": "The Great Gatsby",
+    "author": "F. Scott Fitzgerald",
+    "release_date": "Unknown",
+    "word_count": 48208
   }
 }
