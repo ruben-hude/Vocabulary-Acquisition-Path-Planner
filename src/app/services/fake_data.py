@@ -10,7 +10,7 @@ def get_profile() -> Profile:
     words = [2100, 2380, 2650, 2900, 3050, 3200]
     months = ["June", "July", "August", "September", "October", "November"]
     return Profile(
-        name="User Name",
+        name="Camille",
         member_since="June 2026",
         level="B2",
         known_words=3200,

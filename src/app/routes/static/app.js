@@ -7,6 +7,9 @@
     preferences: "/api/preferences",
   };
 
+  const USE_MOCK = new URLSearchParams(window.location.search).get("mock") === "1";
+  const API_BASE_URL = "http://localhost:8000/api";
+
   // ---------- Traductions : l'API envoie de l'anglais, la page est en français ----------
   const MONTHS_SHORT = {
     January: "Janv.", February: "Févr.", March: "Mars", April: "Avr.", May: "Mai", June: "Juin",
