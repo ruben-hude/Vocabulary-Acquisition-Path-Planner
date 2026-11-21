@@ -17,9 +17,7 @@ from vocabulary_acquisition_path_planner.models.learner_vocabulary import (
     LearnerVocabulary,
 )
 from vocabulary_acquisition_path_planner.models.media import Media
-from vocabulary_acquisition_path_planner.models.processed.reading_history import (
-    ReadingHistory,
-)
+from vocabulary_acquisition_path_planner.models.reading_history import ReadingHistory
 
 # Chemins vers les dossiers de données (depuis src/app/services/real_data.py -> parents[3] = racine du projet)
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
