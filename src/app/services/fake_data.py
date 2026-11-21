@@ -22,12 +22,9 @@ def get_profile() -> Profile:
 
 def get_read_books() -> list[ReadBook]:
     return [
-        ReadBook(id="psychology-of-money", title="The Psychology of Money",
-                 author="Morgan Housel", level="B2", completed_at="2026-10-28",
-                 learned_words=210),
-        ReadBook(id="dorian-gray", title="The Picture of Dorian Gray",
-                 author="Oscar Wilde", level="B2", completed_at="2026-10-03",
-                 learned_words=320),
+        ReadBook(id="11", title="Alice's Adventures in Wonderland",
+                 author="Lewis Carroll", level="unknown", completed_at="2026-10-07",
+                 learned_words=0, cover_url="unknown"),
     ]
 
 
