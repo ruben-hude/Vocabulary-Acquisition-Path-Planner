@@ -14,6 +14,7 @@ from vocabulary_acquisition_path_planner.search.path_finder import PathFinder
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 BOOKS_PATH = PROJECT_ROOT / "data" / "raw" / "gutenberg_books" # Path to the folder containing the books
+BOOKS_METADATA_PATH = PROJECT_ROOT / "data" / "books_metadata.json"
 READING_HISTORY_PATH = PROJECT_ROOT / "data" / "processed" / "reading_history.json"
 
 router = APIRouter(prefix="/api", tags=["path"])
@@ -27,12 +28,23 @@ def get_index():
 @router.get("/books")
 def get_books():
     """
-    Return a list of available books in the static folder.
-    Each book is represented as a dictionary with its name and path.
+    Return available books with metadata for the frontend catalog.
     """
+    metadata = {}
+    if BOOKS_METADATA_PATH.is_file():
+        metadata = json.loads(BOOKS_METADATA_PATH.read_text(encoding="utf-8"))
+
     books = []
-    for file in BOOKS_PATH.glob("*.txt"):
-        books.append({"name": file.stem, "path": str(file.relative_to(PROJECT_ROOT))})
+    for file in sorted(BOOKS_PATH.glob("book_*.txt")):
+        book_id = file.stem.removeprefix("book_")
+        book_metadata = metadata.get(book_id, {})
+        books.append({
+            "id": book_id,
+            "name": file.stem,
+            "title": book_metadata.get("title") or file.stem,
+            "author": book_metadata.get("author") or "Project Gutenberg",
+            "path": str(file.relative_to(PROJECT_ROOT)),
+        })
     return {"books": books}
 
 @router.get("/book/{id}")
@@ -122,6 +134,9 @@ def get_path(
             READING_HISTORY_PATH.read_text(encoding="utf-8")
         ).get("books", {})
 
+    if reading_history.get(f"book_{target_id}.txt", {}).get("is_read") is True:
+        return []
+
     media_by_id = {}
     read_media_ids = set()
     for book_path in BOOKS_PATH.glob("book_*.txt"):
@@ -132,9 +147,6 @@ def get_path(
         if history.get("is_read") is True:
             initial_vocabulary.account_for_media(media_by_id[book_id])
             read_media_ids.add(book_id)
-
-    if target_id in read_media_ids:
-        return []
 
     target_media = media_by_id[target_id]
     graph_media = [

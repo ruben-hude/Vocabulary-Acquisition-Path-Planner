@@ -3,12 +3,15 @@
   const API = {
     profile: "/api/profile",
     readBooks: "/api/read-books",
-    currentPath: "/api/current-path",
+    books: "/api/books",
+    path: "/api/path",
     preferences: "/api/preferences",
   };
 
-  const USE_MOCK = new URLSearchParams(window.location.search).get("mock") === "1";
-  const API_BASE_URL = "http://localhost:8000/api";
+  let booksById = new Map();
+  let readBookIds = new Set();
+  let selectedTargetBookId = "";
+  let selectedReadBookId = "";
 
   // ---------- Traductions : l'API envoie de l'anglais, la page est en français ----------
   const MONTHS_SHORT = {
@@ -23,10 +26,17 @@
   const GENRES = { Classics: "Classique", "Science fiction": "Science-fiction", Crime: "Policier", Biography: "Biographie" };
   const STEP_CLASS = { read: "done", in_progress: "current", upcoming: "", target: "cible" };
   const STEP_LABEL = { read: "Lu", in_progress: "En cours", upcoming: "À venir" };
-  const CHECK_SVG = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3.5 8.3l3 3 6-6.6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
   // ---------- Outils ----------
   const fmt = n => n.toLocaleString("fr-FR");
+  const normalizeBookId = id => {
+    const match = /^(?:book_)?(\d+)(?:\.txt)?$/.exec(String(id));
+    return match ? match[1] : String(id);
+  };
+  const normalizeSearchText = text => String(text ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
   const dateFR = iso => new Date(iso + "T12:00:00")
     .toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" });
   const memberSinceFR = text => {            // "June 2026" → "juin 2026"
@@ -83,7 +93,7 @@
     document.querySelector("#profil .user-info").textContent =
       `Membre depuis ${memberSinceFR(p.member_since)}  ·  ${p.nb_read_books} livres lus`;
     document.querySelector(".niveau-badge").textContent = p.level;
-    document.querySelector(".niveau strong").textContent = `${fmt(p.known_words)} mots connus`;
+    document.querySelector(".niveau .known-words-link").textContent = `${fmt(p.known_words)} mots connus`;
     document.querySelectorAll(".chip-vocab").forEach(c => {
       c.textContent = `Niveau ${p.level}  ·  ${fmt(p.known_words)} mots connus  ·  Objectif : ${targetTitle}`;
     });
@@ -133,8 +143,18 @@
   }
 
   // ---------- Derniers livres lus ----------
-    function renderReadBooks(books) {
-    document.querySelector(".livres").replaceChildren(...books.slice(0, 3).map(b => {
+  function enrichReadBooks(books) {
+    return books.map(book => {
+      const catalogBook = booksById.get(normalizeBookId(book.id));
+      return catalogBook
+        ? { ...book, title: catalogBook.title, author: catalogBook.author }
+        : book;
+    });
+  }
+
+  function renderReadBooks(books) {
+    const enrichedBooks = enrichReadBooks(books);
+    document.querySelector(".livres").replaceChildren(...enrichedBooks.slice(0, 3).map(b => {
       const card = el("article", "livre");
       let cover;
       if (b.cover_url) {
@@ -157,10 +177,60 @@
     }));
   }
 
+  function renderReadHistory(books) {
+    const sortedBooks = enrichReadBooks(books).sort((a, b) =>
+      b.completed_at.localeCompare(a.completed_at) || a.title.localeCompare(b.title, "fr")
+    );
+    const list = document.querySelector("#read-history-list");
+    const emptyMessage = document.querySelector("#read-history-empty");
+    document.querySelector("#read-history-count").textContent =
+      `${sortedBooks.length} livre${sortedBooks.length > 1 ? "s" : ""}`;
+    emptyMessage.hidden = sortedBooks.length > 0;
+    list.replaceChildren(...sortedBooks.map(book => {
+      const item = el("article", "read-history-item");
+      const info = el("div", "read-history-info");
+      info.append(
+        el("strong", "", book.title),
+        el("span", "", book.author)
+      );
+      const meta = el("div", "read-history-meta");
+      const date = el("time", "read-history-date", `Lu le ${dateFR(book.completed_at)}`);
+      date.dateTime = book.completed_at;
+      meta.append(date, el("span", "pill", `+ ${fmt(book.learned_words)} mots appris`));
+      item.append(info, meta);
+      return item;
+    }));
+  }
+
   // ---------- Chemin en cours ----------
+  function createPathStep(step, index) {
+    const row = el("div", ("etape " + (STEP_CLASS[step.status] ?? "")).trim());
+    const marker = el("div", "repere", String(index + 1));
+    const text = el("div", "etape-texte");
+    text.append(
+      el("strong", "", step.title),
+      el("span", "", `${step.author}  ·  Coût : ${fmt(step.cost)} occurrences`)
+    );
+    const end = step.status === "target"
+      ? el("span", "tag-cible", "Livre cible")
+      : el("span", "statut", STEP_LABEL[step.status] ?? step.status);
+    row.append(marker, text, end);
+    return row;
+  }
+
   function renderPath(path) {
     const card = document.querySelector("#profil .chemin");
-    const beforeTarget = path.steps.filter(s => s.status !== "target");
+    const pathSteps = path?.steps ?? [];
+    if (!path) {
+      card.querySelector("h2").textContent = "Aucun parcours calculé";
+      card.querySelector(".meta").textContent = "Choisis une cible dans la page Parcours.";
+      card.querySelector(".prog-labels span:last-child").textContent = "—";
+      card.querySelector(".barre > div").style.width = "0%";
+      card.querySelector(".etapes").replaceChildren();
+      return;
+    }
+
+    const beforeTarget = pathSteps.filter(s => s.status !== "target");
     const done = beforeTarget.filter(s => s.status === "read").length;
 
     card.querySelector("h2").textContent = `Vers ${path.target_title}`;
@@ -170,22 +240,251 @@
     card.querySelector(".barre > div").style.width =
       (beforeTarget.length ? (100 * done) / beforeTarget.length : 0) + "%";
 
-    card.querySelector(".etapes").replaceChildren(...path.steps.map((s, i) => {
-      const row = el("div", ("etape " + (STEP_CLASS[s.status] ?? "")).trim());
-      const marker = el("div", "repere");
-      if (s.status === "read") marker.innerHTML = CHECK_SVG;   // constante, pas une donnée de l'API
-      else marker.textContent = String(i + 1);
-      const text = el("div", "etape-texte");
-      text.append(
-        el("strong", "", s.title),
-        el("span", "", `${s.author}  ·  ${s.level}  ·  + ${fmt(s.new_words)} mots`)
+    card.querySelector(".etapes").replaceChildren(
+      ...pathSteps.map(createPathStep)
+    );
+  }
+
+  function renderWorkflowSteps(steps) {
+    document.querySelector("#path-results").replaceChildren(
+      ...steps.map(createPathStep)
+    );
+  }
+
+  function populateBookControls(catalog, readBooks) {
+    booksById = new Map(catalog.map(book => [String(book.id), book]));
+    readBookIds = new Set(readBooks.map(book => normalizeBookId(book.id)));
+
+    document.querySelector("#target-book-search").disabled = false;
+    document.querySelector("#target-book-search-status").textContent =
+      "Saisis un titre ou un auteur pour rechercher.";
+    document.querySelector("#read-book-search").disabled = false;
+    document.querySelector("#read-book-search-status").textContent =
+      "Saisis un titre ou un auteur pour rechercher.";
+    updateReadBookAction();
+  }
+
+  function findBooksMatchingQuery(query) {
+    const normalizedQuery = normalizeSearchText(query.trim());
+    if (!normalizedQuery) {
+      return [];
+    }
+
+    return [...booksById.values()]
+      .filter(book => normalizeSearchText(`${book.title} ${book.author}`).includes(normalizedQuery))
+      .sort((a, b) => a.title.localeCompare(b.title, "fr"));
+  }
+
+  function createBookSearchResult(book, onSelect, isRead = null) {
+    const item = el("li");
+    const button = el("button", "book-search-result");
+    button.type = "button";
+    const readStatus = isRead === null ? "" : isRead ? "déjà marqué comme lu" : "non lu";
+    button.setAttribute("aria-label", `${book.title}, ${book.author}${readStatus ? `, ${readStatus}` : ""}`);
+
+    const copy = el("span", "book-search-result-copy");
+    copy.append(el("strong", "", book.title), el("span", "", book.author));
+    button.append(copy);
+    if (isRead !== null) {
+      const state = el("span", `book-search-result-state${isRead ? " is-read" : ""}`, isRead ? "Déjà lu" : "Non lu");
+      button.append(state);
+    }
+    button.addEventListener("click", onSelect);
+    item.append(button);
+    return item;
+  }
+
+  function renderBookSearchResults(query, resultsId, statusId, onSelect, showReadState = false) {
+    const normalizedQuery = normalizeSearchText(query.trim());
+    const results = document.querySelector(`#${resultsId}`);
+    const searchStatus = document.querySelector(`#${statusId}`);
+    if (!normalizedQuery) {
+      results.replaceChildren();
+      results.hidden = true;
+      searchStatus.textContent = "Saisis un titre ou un auteur pour rechercher.";
+      return;
+    }
+
+    const matches = findBooksMatchingQuery(query);
+    const visibleMatches = matches.slice(0, 8);
+    results.replaceChildren(...visibleMatches.map(book =>
+      createBookSearchResult(
+        book,
+        () => onSelect(book),
+        showReadState ? readBookIds.has(normalizeBookId(book.id)) : null
+      )
+    ));
+    results.hidden = visibleMatches.length === 0;
+
+    if (matches.length === 0) {
+      searchStatus.textContent = "Aucun livre trouvé. Essaie un autre titre ou auteur.";
+    } else if (matches.length > visibleMatches.length) {
+      searchStatus.textContent = `${visibleMatches.length} résultats affichés sur ${matches.length}. Affine ta recherche.`;
+    } else {
+      searchStatus.textContent = `${matches.length} résultat${matches.length > 1 ? "s" : ""}.`;
+    }
+  }
+
+  function selectTargetBook(book) {
+    selectedTargetBookId = String(book.id);
+    document.querySelector("#target-book-results").hidden = true;
+    document.querySelector("#target-book-search-status").textContent =
+      `Livre cible sélectionné : ${book.title} — ${book.author}.`;
+    renderPath(null);
+    renderWorkflowSteps([]);
+    setPathStatus("Clique sur « Calculer le chemin » pour lancer le calcul.");
+    document.querySelector("#calculate-path").focus();
+  }
+
+  function selectReadBook(book) {
+    selectedReadBookId = String(book.id);
+    document.querySelector("#read-book-results").hidden = true;
+    document.querySelector("#read-book-search-status").textContent =
+      `Livre sélectionné : ${book.title} — ${book.author}.`;
+    updateReadBookAction();
+    document.querySelector("#toggle-read-book").focus();
+  }
+
+  function updateReadBookAction() {
+    const bookId = selectedReadBookId;
+    const button = document.querySelector("#toggle-read-book");
+    const status = document.querySelector("#read-state-status");
+    status.style.color = "";
+    if (!bookId) {
+      button.disabled = true;
+      button.textContent = "Marquer comme lu";
+      status.textContent = "Recherche un livre et sélectionne un résultat.";
+      return;
+    }
+
+    const isRead = readBookIds.has(bookId);
+    const book = booksById.get(bookId);
+    button.disabled = false;
+    button.textContent = isRead ? "Annuler le marquage" : "Marquer comme lu";
+    status.textContent = `${book.title} : ${isRead
+      ? "ce livre fait partie du vocabulaire initial."
+      : "ce livre n’est pas encore inclus dans le vocabulaire initial."}`;
+  }
+
+  function makePathModel(path, targetId) {
+    const target = booksById.get(targetId);
+    return {
+      target_title: target?.title ?? `book_${targetId}`,
+      path_type: "shortest",
+      steps: path.map((step, index) => {
+        const book = booksById.get(String(step.id));
+        return {
+          title: book?.title ?? step.name,
+          author: book?.author ?? "Project Gutenberg",
+          cost: step.cost,
+          status: index === path.length - 1
+            ? "target"
+            : index === 0
+              ? "in_progress"
+              : "upcoming",
+        };
+      }),
+    };
+  }
+
+  function setPathStatus(message, isError = false) {
+    const status = document.querySelector("#path-status");
+    status.textContent = message;
+    status.style.color = isError ? "var(--red)" : "var(--on-surface-variant)";
+  }
+
+  async function calculatePath() {
+    const targetId = selectedTargetBookId;
+    if (!targetId) {
+      setPathStatus("Choisis d’abord un livre cible.", true);
+      return;
+    }
+
+    const button = document.querySelector("#calculate-path");
+    const threshold = Number(document.querySelector("#path-threshold").value) / 100;
+    button.disabled = true;
+    setPathStatus("Calcul du chemin en cours…");
+
+    try {
+      const response = await fetch(
+        `${API.path}/${encodeURIComponent(targetId)}?comprehension_threshold=${threshold}`
       );
-      const end = s.status === "target"
-        ? el("span", "tag-cible", "Livre cible")
-        : el("span", "statut", STEP_LABEL[s.status] ?? s.status);
-      row.append(marker, text, end);
-      return row;
-    }));
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.detail || `Erreur ${response.status}`);
+      }
+      if (!Array.isArray(result)) {
+        throw new Error("Réponse inattendue de l’API de parcours.");
+      }
+
+      renderWorkflowSteps([]);
+      if (result.length === 0) {
+        renderPath(null);
+        setPathStatus(readBookIds.has(targetId)
+          ? "La cible est déjà marquée comme lue : aucun livre n’est à ajouter."
+          : "Aucun chemin trouvé pour cette cible et ce seuil.");
+        return;
+      }
+
+      const path = makePathModel(result, targetId);
+      renderPath(path);
+      renderWorkflowSteps(path.steps);
+      setPathStatus(`${result.length} livre${result.length > 1 ? "s" : ""} dans le chemin calculé.`);
+    } catch (error) {
+      console.error("Unable to calculate the reading path:", error);
+      setPathStatus(`Échec du calcul : ${error.message}`, true);
+    } finally {
+      button.disabled = false;
+    }
+  }
+
+  async function toggleReadBook() {
+    const bookId = selectedReadBookId;
+    if (!bookId) {
+      return;
+    }
+
+    const isRead = readBookIds.has(bookId);
+    const button = document.querySelector("#toggle-read-book");
+    button.disabled = true;
+    try {
+      const response = await fetch(`${API.readBooks}/${encodeURIComponent(bookId)}`, {
+        method: isRead ? "DELETE" : "PUT",
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.detail || `Erreur ${response.status}`);
+      }
+
+      if (result.is_read) readBookIds.add(bookId);
+      else readBookIds.delete(bookId);
+
+      const [profile, readBooks] = await Promise.all([
+        getJSON(API.profile),
+        getJSON(API.readBooks),
+      ]);
+      readBookIds = new Set(readBooks.map(book => normalizeBookId(book.id)));
+      const targetId = selectedTargetBookId;
+      const target = booksById.get(targetId);
+      renderProfile(profile, target?.title ?? "aucun");
+      renderReadBooks(readBooks);
+      renderReadHistory(readBooks);
+      updateReadBookAction();
+      document.querySelector("#read-state-status").textContent = result.is_read
+        ? "Livre marqué comme lu ; son vocabulaire sera pris en compte."
+        : "Marquage annulé ; le vocabulaire de ce livre ne sera plus initial.";
+
+      if (targetId) {
+        await calculatePath();
+      }
+    } catch (error) {
+      console.error("Unable to update the reading state:", error);
+      document.querySelector("#read-state-status").textContent =
+        `Échec de la mise à jour : ${error.message}`;
+      document.querySelector("#read-state-status").style.color = "var(--red)";
+    } finally {
+      updateReadBookAction();
+    }
   }
 
   // ---------- Préférences ----------
@@ -203,20 +502,52 @@
   // ---------- Lancement ----------
   async function init() {
     try {
-      const [profile, books, path, preferences] = await Promise.all([
+      const [profile, readBooks, catalogData, preferences] = await Promise.all([
         getJSON(API.profile),
         getJSON(API.readBooks),
-        getJSON(API.currentPath),
+        getJSON(API.books),
         getJSON(API.preferences),
       ]);
-      renderProfile(profile, path.target_title);
-      renderReadBooks(books);
-      renderPath(path);
+      populateBookControls(catalogData.books, readBooks);
+      renderProfile(profile, "aucun");
+      renderReadBooks(readBooks);
+      renderReadHistory(readBooks);
+      renderPath(null);
       renderPreferences(preferences);
     } catch (error) {
       console.error(error);
       showError("Impossible de charger les données : l'API est-elle lancée ?");
     }
   }
+
+  document.querySelector("#target-book-search").addEventListener("input", event => {
+    selectedTargetBookId = "";
+    renderPath(null);
+    renderWorkflowSteps([]);
+    setPathStatus("Choisis un livre cible puis lance le calcul.");
+    renderBookSearchResults(
+      event.target.value,
+      "target-book-results",
+      "target-book-search-status",
+      selectTargetBook
+    );
+  });
+  document.querySelector("#read-book-search").addEventListener("input", event => {
+    selectedReadBookId = "";
+    updateReadBookAction();
+    renderBookSearchResults(
+      event.target.value,
+      "read-book-results",
+      "read-book-search-status",
+      selectReadBook,
+      true
+    );
+  });
+  document.querySelector("#toggle-read-book").addEventListener("click", toggleReadBook);
+  document.querySelector("#calculate-path").addEventListener("click", calculatePath);
+  document.querySelector("#path-threshold").addEventListener("input", event => {
+    document.querySelector("#threshold-value").textContent = event.target.value;
+  });
+
   init();
 })();

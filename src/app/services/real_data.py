@@ -44,7 +44,8 @@ def _estimate_cefr_level(known_words_count: int) -> str:
 
 def _format_title(book_id: str) -> str:
     """Transforme 'book_1' ou 'pride-and-prejudice' en titre lisible."""
-    return book_id.replace("_", " ").replace("-", " ").title()
+    book_stem = Path(book_id).stem
+    return book_stem.replace("_", " ").replace("-", " ").title()
 
 
 def _resolve_book_path(book_id: str, raw_source_path: str | None) -> Path | None:
@@ -56,7 +57,16 @@ def _resolve_book_path(book_id: str, raw_source_path: str | None) -> Path | None
         if p.exists():
             return p
 
-    for candidate in (BOOKS_PATH / f"{book_id}.txt", BOOKS_PATH / f"book_{book_id}.txt"):
+    book_name = Path(book_id).name
+    if Path(book_name).suffix:
+        candidates = (BOOKS_PATH / book_name,)
+    else:
+        candidates = (
+            BOOKS_PATH / f"{book_name}.txt",
+            BOOKS_PATH / f"book_{book_name}.txt",
+        )
+
+    for candidate in candidates:
         if candidate.exists():
             return candidate
     return None
@@ -144,6 +154,24 @@ def get_profile() -> Profile:
 def get_read_books() -> list[ReadBook]:
     _, read_books, _, _, _, _ = _compute_learner_state()
     return read_books
+
+
+def set_book_read_state(book_id: int, is_read: bool) -> None:
+    """Mark a library book as read or unread in the persistent history."""
+    book_path = BOOKS_PATH / f"book_{book_id}.txt"
+    if not book_path.is_file():
+        raise FileNotFoundError(f"Book {book_id} not found")
+
+    try:
+        source_path = book_path.relative_to(PROJECT_ROOT)
+    except ValueError:
+        source_path = book_path
+
+    history = ReadingHistory(HISTORY_PATH)
+    if is_read:
+        history.mark_read(book_path.name, source_path)
+    else:
+        history.mark_unread(book_path.name, source_path)
 
 
 def get_current_path() -> CurrentPath:
