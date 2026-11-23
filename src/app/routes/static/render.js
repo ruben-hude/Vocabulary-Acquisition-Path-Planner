@@ -18,7 +18,10 @@ let viewMode = "person";
 let bookViewSourceId = null;
 
 const simulation = d3.forceSimulation(nodes)
-  .force("link", d3.forceLink().id(d => d.id).distance(d => 40 + d.threshold * 1.5))
+  .force("link", d3.forceLink()
+    .id(d => d.id)
+    .distance(d => 220 - d.similarity * 180)
+    .strength(d => 0.2 + d.similarity * 1.8))
   .force("charge", d3.forceManyBody().strength(-30))
   .force("center", d3.forceCenter(width / 2, height / 2))
   .on("tick", ticked);
