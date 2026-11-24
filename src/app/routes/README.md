@@ -5,9 +5,10 @@
 This interactive map visualizes vocabulary relationships between the books
 available in `data/raw/gutenberg_books`.
 
-Each book is represented by a node. A connection is created between two books
-when they share word groups. The displayed similarity is calculated using the
-Jaccard index:
+Each downloaded book is represented by a node labeled with its title from
+`data/books_metadata.json`. A connection is created between two books when they
+share word groups. The displayed similarity is calculated using the Jaccard
+index:
 
 ```text
 similarity = common word groups / word groups present in both books

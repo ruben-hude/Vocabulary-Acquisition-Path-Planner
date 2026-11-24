@@ -9004,7 +9004,8 @@
     "title": "Alice's Adventures in Wonderland",
     "author": "Lewis Carroll",
     "release_date": "Unknown",
-    "word_count": 26525
+    "word_count": 26525,
+    "first_publish_year": 1865
   },
   "84": {
     "id": 84,
@@ -9012,7 +9013,8 @@
     "title": "Frankenstein; or, the Modern Prometheus",
     "author": "Mary Wollstonecraft (Godwin) Shelley",
     "release_date": "Unknown",
-    "word_count": 75042
+    "word_count": 75042,
+    "first_publish_year": 1818
   },
   "98": {
     "id": 98,
@@ -9020,7 +9022,8 @@
     "title": "A Tale of Two Cities",
     "author": "Charles Dickens",
     "release_date": "Unknown",
-    "word_count": 135886
+    "word_count": 135886,
+    "first_publish_year": 1859
   },
   "345": {
     "id": 345,
@@ -9028,7 +9031,8 @@
     "title": "Dracula",
     "author": "Bram Stoker",
     "release_date": "Unknown",
-    "word_count": 161321
+    "word_count": 161321,
+    "first_publish_year": 1897
   },
   "1232": {
     "id": 1232,
@@ -9044,7 +9048,8 @@
     "title": "Pride and Prejudice",
     "author": "Jane Austen",
     "release_date": "Unknown",
-    "word_count": 127359
+    "word_count": 127359,
+    "first_publish_year": 1894
   },
   "1513": {
     "id": 1513,
@@ -9052,7 +9057,8 @@
     "title": "The Tragedy of Romeo and Juliet",
     "author": "William Shakespeare",
     "release_date": "Unknown",
-    "word_count": 25958
+    "word_count": 25958,
+    "first_publish_year": 1917
   },
   "1661": {
     "id": 1661,
@@ -9060,7 +9066,8 @@
     "title": "The Adventures of Sherlock Holmes",
     "author": "Arthur Conan Doyle",
     "release_date": "Unknown",
-    "word_count": 104508
+    "word_count": 104508,
+    "first_publish_year": 1888
   },
   "2701": {
     "id": 2701,
@@ -9076,6 +9083,7 @@
     "title": "The Great Gatsby",
     "author": "F. Scott Fitzgerald",
     "release_date": "Unknown",
-    "word_count": 48208
+    "word_count": 48208,
+    "first_publish_year": 1925
   }
 }
