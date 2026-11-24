@@ -53,12 +53,15 @@ async function loadGraph() {
         const id = getBookId(book.name);
         return id === null ? null : {
           id: String(id),
-          title: book.name,
+          title: book.title,
         };
       })
       .filter(book => book !== null);
 
     const similaritiesResponse = await apiFetch("/api/similarities");
+    if (!similaritiesResponse.ok) {
+      throw new Error("Unable to load precomputed book similarities");
+    }
     const similaritiesData = await similaritiesResponse.json();
     allLinks = similaritiesData.links.map(link => ({
       source: String(link.source),
@@ -96,49 +99,22 @@ async function loadDirectLinks() {
     return;
   }
 
+  const params = new URLSearchParams();
   for (const readBookId of readBookIds) {
-    directLinks.push({
-      source: "you",
-      target: readBookId,
-      threshold: 100,
-      similarity: 1,
-    });
-
-    for (const book of books) {
-      if (readBookId === book.id) {
-        continue;
-      }
-
-      try {
-        const response = await apiFetch(
-          `/api/similarity/${readBookId}/${book.id}`
-        );
-        const data = await response.json();
-        const similarity = data.similar_percent;
-        const threshold = similarity * 100;
-        directLinks.push({
-          source: "you",
-          target: book.id,
-          threshold,
-          similarity,
-        });
-      } catch (error) {
-        console.error(
-          `Unable to calculate direct similarity for ${readBookId} -> ${book.id}:`,
-          error
-        );
-      }
-    }
+    params.append("read_book_ids", readBookId);
   }
 
-  const strongestLinks = new Map();
-  for (const link of directLinks) {
-    const current = strongestLinks.get(link.target);
-    if (!current || link.similarity > current.similarity) {
-      strongestLinks.set(link.target, link);
-    }
+  const response = await apiFetch(`/api/similarities/you?${params.toString()}`);
+  if (!response.ok) {
+    throw new Error("Unable to calculate similarities for you");
   }
-  directLinks = [...strongestLinks.values()];
+  const data = await response.json();
+  directLinks = data.links.map(link => ({
+    source: link.source,
+    target: String(link.target),
+    threshold: link.similar_percent * 100,
+    similarity: link.similar_percent,
+  }));
 }
 
 async function showShortestPath(bookId) {
