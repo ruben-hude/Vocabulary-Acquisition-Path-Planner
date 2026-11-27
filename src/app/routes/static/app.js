@@ -93,7 +93,7 @@
     document.querySelector("#profil .user-info").textContent =
       `Membre depuis ${memberSinceFR(p.member_since)}  ·  ${p.nb_read_books} livres lus`;
     document.querySelector(".niveau-badge").textContent = p.level;
-    document.querySelector(".niveau .known-words-link").textContent = `${fmt(p.known_words)} mots connus`;
+    document.querySelector(".niveau .known-words").textContent = `${fmt(p.known_words)} mots connus`;
     document.querySelectorAll(".chip-vocab").forEach(c => {
       c.textContent = `Niveau ${p.level}  ·  ${fmt(p.known_words)} mots connus  ·  Objectif : ${targetTitle}`;
     });

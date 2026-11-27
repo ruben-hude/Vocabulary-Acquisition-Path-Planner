@@ -53,9 +53,8 @@
   .niveau{display:flex;align-items:center;gap:12px}
   .niveau-badge{width:56px;height:44px;border-radius:22px;background:var(--primary);color:#fff;font-size:20px;font-weight:700;display:flex;align-items:center;justify-content:center}
   .niveau small{display:block;font-size:12px;color:var(--on-surface-variant)}
-  .niveau strong,.niveau .known-words-link{display:block;font-size:16px;font-weight:500}
-  .niveau .known-words-link{color:var(--primary);text-decoration:none}
-  .niveau .known-words-link:hover{text-decoration:underline}
+  .niveau strong,.niveau .known-words{display:block;font-size:16px;font-weight:500}
+  .niveau .known-words{color:var(--primary)}
   .courbe{position:relative;width:1164px;height:274px}
   .courbe svg{position:absolute;inset:0}
   .axe{position:absolute;left:0;width:48px;text-align:right;font-size:12px;color:var(--on-surface-variant)}
@@ -255,7 +254,7 @@
         <div class="niveau-badge">B2</div>
         <div>
           <small>Niveau estimé</small>
-          <a class="known-words-link" href="#lectures" title="Voir mes livres lus">3 200 mots connus</a>
+          <strong class="known-words">3 200 mots connus</strong>
         </div>
       </div>
     </div>
@@ -306,7 +305,7 @@
   <div class="card derniers">
     <div class="derniers-head">
       <div class="card-title">Derniers livres lus</div>
-      <a class="link" href="#">Voir tout l’historique</a>
+      <a class="link" href="#lectures">Voir tout l’historique</a>
     </div>
     <div class="livres">
       <article class="livre">
@@ -414,8 +413,7 @@
 
   <div class="card workflow">
     <div>
-      <div class="card-title">Calculer un parcours réel</div>
-      <div class="sous muted">Le backend utilise les livres marqués comme lus et le seuil choisi.</div>
+      <div class="card-title">Calculer un parcours de lecture</div>
     </div>
     <div class="workflow-controls">
       <label for="target-book-search">Livre cible
