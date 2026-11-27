@@ -5,7 +5,6 @@
     readBooks: "/api/read-books",
     books: "/api/books",
     path: "/api/path",
-    preferences: "/api/preferences",
   };
 
   let booksById = new Map();
@@ -23,7 +22,6 @@
     July: "juillet", August: "août", September: "septembre", October: "octobre", November: "novembre", December: "décembre",
   };
   const PATH_TYPES = { progressive: "progressif", shortest: "le plus court", gentlest: "le plus doux" };
-  const GENRES = { Classics: "Classique", "Science fiction": "Science-fiction", Crime: "Policier", Biography: "Biographie" };
   const STEP_CLASS = { read: "done", in_progress: "current", upcoming: "", target: "cible" };
   const STEP_LABEL = { read: "Lu", in_progress: "En cours", upcoming: "À venir" };
 
@@ -71,19 +69,6 @@
       "font-size:20px;line-height:1.25;display:flex;align-items:center;" +
       "justify-content:center;text-align:center;padding:0 14px";
     return d;
-  }
-
-  // Miniatures des « livres aimés » : de simples pastilles, car l'API n'envoie que des identifiants
-  function renderMinis(count) {
-    const minis = document.querySelector(".minis");
-    const n = Math.min(count, 3);
-    minis.replaceChildren(...Array.from({ length: n }, (_, i) => {
-      const m = el("div");
-      m.style.cssText = "width:36px;height:52px;border:2px solid #fff;border-radius:6px;" +
-        "background:linear-gradient(90deg,#d1bdf2,#8c6ecc);" +
-        `margin-right:${i === n - 1 ? 0 : -10}px`;
-      return m;
-    }));
   }
 
   // ---------- Profil : identité, niveau, pastille ----------
@@ -487,33 +472,19 @@
     }
   }
 
-  // ---------- Préférences ----------
-  function renderPreferences(p) {
-    const shown = p.genres.slice(0, 4);
-    const rest = p.genres.length - shown.length;
-    const genres = document.querySelector(".prefs .genres");
-    genres.replaceChildren(...shown.map(g => el("span", "pill", GENRES[g] ?? g)));
-    if (rest > 0) genres.append(el("span", "pill more", `+ ${rest}`));
-    const n = p.favorite_books.length;
-    renderMinis(n);
-    document.querySelector("#liked-count").textContent = `${n} livre${n > 1 ? "s" : ""} aimé${n > 1 ? "s" : ""}`;
-  }
-
   // ---------- Lancement ----------
   async function init() {
     try {
-      const [profile, readBooks, catalogData, preferences] = await Promise.all([
+      const [profile, readBooks, catalogData] = await Promise.all([
         getJSON(API.profile),
         getJSON(API.readBooks),
         getJSON(API.books),
-        getJSON(API.preferences),
       ]);
       populateBookControls(catalogData.books, readBooks);
       renderProfile(profile, "aucun");
       renderReadBooks(readBooks);
       renderReadHistory(readBooks);
       renderPath(null);
-      renderPreferences(preferences);
     } catch (error) {
       console.error(error);
       showError("Impossible de charger les données : l'API est-elle lancée ?");

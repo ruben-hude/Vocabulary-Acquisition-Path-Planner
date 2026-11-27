@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>UI V2 – Profil & Parcours</title>
+<title>UI V2 – Profil, parcours et exploration</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
@@ -100,9 +100,9 @@
   .etape.current .statut{color:var(--primary)}
   .tag-cible{background:var(--green);color:#fff;font-size:12px;font-weight:700;padding:4px 10px;border-radius:12px}
 
-  .prefs{left:1300px;top:700px;width:560px;height:340px;padding:28px;display:flex;flex-direction:column;justify-content:space-between}
-  .prefs-top{display:flex;flex-direction:column;gap:16px}
-  .prefs .sub{font-size:13px;margin-top:4px}
+  .exploration-promo{left:1300px;top:700px;width:560px;height:340px;padding:28px;display:flex;flex-direction:column;justify-content:space-between}
+  .exploration-promo-top{display:flex;flex-direction:column;gap:16px}
+  .exploration-promo .sub{font-size:13px;margin-top:4px}
   .label{font-size:14px;font-weight:500;margin-bottom:10px}
   .genres{display:flex;gap:8px}
   .genres .pill{font-size:13px;padding:6px 14px}
@@ -111,7 +111,13 @@
   .minis{display:flex}
   .minis img{width:36px;height:52px;border:2px solid #fff;border-radius:6px;object-fit:cover;margin-right:-10px}
   .minis img:last-child{margin-right:0}
-  .prefs .btn-outline{width:100%;height:52px;border-radius:26px;font-size:17px}
+  .exploration-promo .btn-filled{height:52px;border-radius:26px;font-size:17px;text-decoration:none}
+
+  /* ---------- EXPLORATION ---------- */
+  .exploration-map{left:40px;top:124px;width:1220px;height:916px;background:#fff}
+  .exploration-info{left:1300px;top:124px;width:560px;height:916px;padding:28px}
+  .exploration-info .description{margin-top:16px;font-size:15px;line-height:1.5;color:var(--on-surface-variant)}
+  .exploration-back{position:absolute;left:1600px;top:40px;width:220px;height:48px;border-radius:24px;font-size:15px;text-decoration:none}
 
   /* ---------- PARCOURS ---------- */
   .graphe{left:40px;top:124px;width:1220px;height:916px}
@@ -376,20 +382,20 @@
     <a class="btn-filled" href="#parcours" style="text-decoration:none">Choisir une cible et calculer un chemin</a>
   </div>
 
-  <!-- Préférences -->
-  <div class="card prefs">
-    <div class="prefs-top">
+  <!-- Exploration -->
+  <div class="card exploration-promo">
+    <div class="exploration-promo-top">
       <div>
-        <div class="card-title">Vos préférences de lecture</div>
-        <div class="sub muted">Aidez-nous à vous proposer des livres qui vous plaisent.</div>
+        <div class="card-title">Exploration</div>
+        <div class="sub muted">Découvrez de nouveaux livres sans objectif final de lecture</div>
       </div>
-      <div>
+      <div hidden>
         <div class="label">Genres préférés</div>
         <div class="genres">
           <span class="pill">Fantasy</span><span class="pill">Classique</span><span class="pill">Science-fiction</span><span class="pill">Fable</span><span class="pill more">+ 2</span>
         </div>
       </div>
-      <div>
+      <div hidden>
         <div class="label">Livres aimés</div>
         <div class="aimes">
           <div class="minis">
@@ -401,8 +407,21 @@
         </div>
       </div>
     </div>
-    <button class="btn-outline">Modifier mes préférences</button>
+    <a class="btn-filled" href="#exploration">Voir les livres accessibles</a>
   </div>
+</section>
+
+<!-- ======================= PAGE EXPLORATION ======================= -->
+<section class="page" id="exploration" aria-label="Exploration">
+  <h1 class="page-title">Exploration</h1>
+  <p class="page-subtitle">Découvrez de nouveaux livres sans objectif final de lecture</p>
+  <a class="btn-outline exploration-back" href="#profil">Retour au profil</a>
+
+  <div class="card exploration-map" role="region" aria-label="Carte des livres accessibles"></div>
+  <aside class="card exploration-info" aria-label="Informations sur le livre sélectionné">
+    <div class="card-title">Informations sur le livre</div>
+    <p class="description">Sélectionnez un livre sur la carte pour afficher ses informations.</p>
+  </aside>
 </section>
 
 <!-- ======================= PAGE PARCOURS ======================= -->
