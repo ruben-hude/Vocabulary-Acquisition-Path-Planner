@@ -1,13 +1,18 @@
-from fastapi import APIRouter, Depends
+import os
+from fastapi import APIRouter, Depends, HTTPException
 
 from app.models import CurrentPath, Preferences, Profile, ReadBook
-from app.services import fake_data
+from app.services import fake_data, real_data
+
+# Si USE_FAKE_DATA=1 dans le terminal, on utilise fake_data, sinon real_data
+USE_FAKE = os.getenv("USE_FAKE_DATA", "0") == "1"
+data_service = fake_data if USE_FAKE else real_data
 
 router = APIRouter(prefix="/api", tags=["profile"])
 
 
 def get_profile_data():
-    return fake_data
+    return data_service
 
 
 @router.get("/profile", response_model=Profile)
@@ -18,6 +23,24 @@ def get_profile(profile_data=Depends(get_profile_data)):
 @router.get("/read-books", response_model=list[ReadBook])
 def get_read_books(profile_data=Depends(get_profile_data)):
     return profile_data.get_read_books()
+
+
+def _set_read_book_state(book_id: int, is_read: bool):
+    try:
+        real_data.set_book_read_state(book_id, is_read)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail="Book not found") from exc
+    return {"id": str(book_id), "is_read": is_read}
+
+
+@router.put("/read-books/{book_id}")
+def mark_book_as_read(book_id: int):
+    return _set_read_book_state(book_id, True)
+
+
+@router.delete("/read-books/{book_id}")
+def mark_book_as_unread(book_id: int):
+    return _set_read_book_state(book_id, False)
 
 
 @router.get("/current-path", response_model=CurrentPath)

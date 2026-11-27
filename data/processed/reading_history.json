@@ -6,6 +6,20 @@
         "2026-10-07"
       ],
       "is_read": true
+    },
+    "book_652150.txt": {
+      "source_path": "data\\raw\\gutenberg_books\\book_652150.txt",
+      "read_at": [
+        "2026-11-22T13:36:09+00:00"
+      ],
+      "is_read": true
+    },
+    "book_173708.txt": {
+      "source_path": "data\\raw\\gutenberg_books\\book_173708.txt",
+      "read_at": [
+        "2026-11-22T13:36:46+00:00"
+      ],
+      "is_read": false
     }
   }
 }

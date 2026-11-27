@@ -51,17 +51,44 @@ pip install pandas openpyxl
 From the project root, start the FastAPI API with:
 
 ```powershell
+$env:PYTHONPATH = "$PWD\src"
 fastapi dev src/app/main.py
 ```
 
-Then open the address displayed by FastAPI, typically:
+Open the page you want to test:
 
 ```text
-http://127.0.0.1:8000
+http://127.0.0.1:8000/render.html
 ```
 
 The server exposes the interactive page and API routes through
 `src/app/main.py`. The static page is located in `src/app/routes/static`.
+
+## Test the profile workflow
+
+The `ui-v2.html` page uses the real profile and path APIs. On Windows, start
+the server with `PYTHONPATH` set as above, then open:
+
+```text
+http://127.0.0.1:8000/ui-v2.html
+```
+
+On the profile page, select the known-words count to open **Mes livres lus**.
+The page lists completed books from newest to oldest and provides a search by
+title or author. Select a result to mark it as read or undo its read status.
+Those changes are stored in `data/processed/reading_history.json`.
+
+To calculate a path, open **Parcours**, search for a target by title or author,
+select a result, adjust the comprehension threshold if needed, and select
+**Calculer le chemin**. Leave `USE_FAKE_DATA` unset or set it to `0` to use
+the real data service.
+
+On macOS or Linux, set the import path before starting the API:
+
+```bash
+export PYTHONPATH=src
+fastapi dev src/app/main.py
+```
 
 ## Structure
 
